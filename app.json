@@ -36,6 +36,15 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "87b55e85-626a-4842-adfd-244993450895"
+      }
+    },
+    "owner": "henri.willman"
   }
 }
