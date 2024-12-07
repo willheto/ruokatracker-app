@@ -1,31 +1,40 @@
 import type { PropsWithChildren, ReactElement } from "react";
-import { SafeAreaView, StyleSheet } from "react-native";
-import { ThemedView } from "@/components/ThemedView";
+import { KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, StyleSheet } from "react-native";
 
-const HEADER_HEIGHT = 250;
+interface PageViewProps {
+  withKeyboardAvoidance?: boolean;
+}
 
 export default function PageView({
   children,
-}: PropsWithChildren<{}>): ReactElement {
+  withKeyboardAvoidance = true,
+}: PropsWithChildren<PageViewProps>): ReactElement {
+  const Wrapper = withKeyboardAvoidance ? KeyboardAvoidingView : SafeAreaView;
+
   return (
     <SafeAreaView style={styles.container}>
-      <ThemedView style={styles.content}>{children}</ThemedView>
+      <Wrapper
+        style={styles.wrapper}
+        {...(withKeyboardAvoidance && {
+          behavior: Platform.OS === "ios" ? "padding" : "height",
+        })}
+      >
+        <ScrollView contentContainerStyle={styles.content}>{children}</ScrollView>
+      </Wrapper>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+    marginBottom: 50,
+  },
   container: {
     flex: 1,
+    backgroundColor: "rgb(21, 23, 24)",
   },
-
   content: {
-    flex: 1,
-    padding: 32,
-    gap: 16,
-    overflow: "hidden",
-    display: "flex",
-    flexDirection: "column",
-    height: "100%",
+    flexGrow: 1,
   },
 });

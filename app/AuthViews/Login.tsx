@@ -1,14 +1,15 @@
 import { login } from "@/api/services/authService";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import Logger from "@/util/Logger";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { View, StyleSheet } from "react-native";
-import { LoginInputs, SCREEN } from "./(tabs)";
 import { Button, Input } from "@ui-kitten/components";
-import { Screen } from "./(tabs)";
+import { getErrorString } from "@/util/getErrorString";
+import { LoginInputs, SCREEN } from "./AuthScreen";
+import { Screen } from "./AuthScreen";
+import { useUser } from "@/context/UserContext";
 
 export default function Login({
   setScreen,
@@ -18,16 +19,18 @@ export default function Login({
   const { control, handleSubmit } = useForm<LoginInputs>();
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const { setUser } = useUser();
+
   const onSubmit: SubmitHandler<LoginInputs> = async (data): Promise<void> => {
     try {
       setError(null);
       setIsSubmitting(true);
       const response = await login(data);
       const token = response.token;
-      await AsyncStorage.setItem("jwt", token);
+      await AsyncStorage.setItem("ruokatrackerAuthToken", token);
+      setUser(response.user);
     } catch (error: any) {
-      const errorMessage = error.response.data;
-      Logger.printError("Error logging in: " + errorMessage);
+      const errorMessage = getErrorString(error);
       setError(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -35,14 +38,14 @@ export default function Login({
   };
 
   return (
-    <View>
+    <View style={{ padding: 20, flex: 1, justifyContent: "center" }}>
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">Login</ThemedText>
       </ThemedView>
 
       <ThemedView style={styles.loginContainer}>
-        <ThemedText style={{ color: "red" }}>{error}</ThemedText>
         <ThemedView>
+          <ThemedText style={{ color: "red", marginBottom: 5, marginTop: 5 }}>{error ? error : ' '}</ThemedText>
           <ThemedText type="subtitle">Email</ThemedText>
 
           <Controller
@@ -76,6 +79,7 @@ export default function Login({
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
+                secureTextEntry={true}
               />
             )}
             name="password"
@@ -105,6 +109,7 @@ export default function Login({
         </View>
       </ThemedView>
     </View>
+
   );
 }
 
